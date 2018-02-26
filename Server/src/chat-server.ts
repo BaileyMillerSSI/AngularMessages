@@ -2,9 +2,11 @@ import { createServer, Server } from 'http';
 import * as express from 'express';
 import * as socketIo from 'socket.io';
 
-import { Message } from './model/message';
+import { ChatMessage } from './model/chat-message';
 import { Event, Action } from "./model/enums";
 import { Configuration } from "./model/config";
+import { User } from './model/user';
+import { ConnectionChange } from './model/connection-change';
 
 export class ChatServer
 {
@@ -43,6 +45,11 @@ export class ChatServer
         this.io = socketIo(this.server);
     }
 
+    private ConnectionNotification(a: Action.JOINED | Action.LEFT, u: User)
+    {
+        this.io.emit(Action.CONNECTED, new ConnectionChange(a, u));
+    }
+
     private listen(): void
     {
 
@@ -50,27 +57,31 @@ export class ChatServer
         {
             console.log('Running server on port %s', this.port);
         });
-    
-        this.io.on(Event.CONNECT, (socket: any) =>
-        {
-            console.log('Connected client on port %s.', this.port);
 
-            socket.on('message', (m: Message) =>
+        this.io.on(Event.CONNECT, (socket: SocketIO.Socket) =>
+        {
+            socket.on('message', (m: ChatMessage) =>
             {
-                //console.log('[server](message): %s', JSON.stringify(m));
                 this.io.emit('message', m);
             });
 
-            socket.on('action', (a: Action) =>
+            // Left and joined actions
+            socket.on(Action.JOINED, (u: User) =>
             {
-                this.io.emit('action', a);
+                this.io.emit(Action.CONNECTED, new ConnectionChange(Action.JOINED, u));
             });
 
-            socket.on(Event.DISCONNECT, () =>
+            socket.on(Action.LEFT, (u: User) =>
             {
-                console.log('Client disconnected');
+                this.io.emit(Action.CONNECTED, new ConnectionChange(Action.LEFT, u));
+            });
+
+            socket.on(Action.RENAME, (oldUser: User, newUser: User) =>
+            {
+                this.io.emit(Action.RENAME, oldUser, newUser);
             });
         });
+
     }
 
     public getApp(): express.Application

@@ -1,8 +1,9 @@
 export enum Action
 {
-    JOINED,
-    LEFT,
-    RENAME
+    JOINED = 'joined',
+    LEFT = 'left',
+    CONNECTED = 'connected',
+    RENAME = 'renamed'
 }
 
 // Socket.io events

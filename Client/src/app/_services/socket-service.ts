@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, HostListener } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 
-import { User, Message, ChatMessage, Action, Event, Configuration } from '../../../../Server/src/model/index';
+import { User, Message, ChatMessage, Action, Event, Configuration, ConnectionChange } from '../../../../Server/src/model/index';
 
 import * as socketIo from 'socket.io-client';
 
@@ -12,15 +12,24 @@ const SERVER_URL = `${Configuration.URL}:${Configuration.PORT}`;
 export class SocketService
 {
     private socket;
+    private _User: User;
 
-    public initSocket(): void
+    public initSocket(u: User): void
     {
         this.socket = socketIo(SERVER_URL);
+        this.socket.emit(Action.JOINED, u);
+        this._User = u;
+
+        // Register for page exit event!
+        window.onbeforeunload = () =>
+        {
+            this.socket.emit(Action.LEFT, this._User)
+        };
     }
 
-    public send(message: Message): void
+    public send(s: string): void
     {
-        this.socket.emit('message', message);
+        this.socket.emit('message', new ChatMessage(this._User, s, new Date()));
     }
 
     public onMessage(): Observable<ChatMessage>
@@ -28,6 +37,22 @@ export class SocketService
         return new Observable<ChatMessage>(observer =>
         {
             this.socket.on('message', (data: ChatMessage) => observer.next(data));
+        });
+    }
+
+    public onConnectionNotification(): Observable<ConnectionChange>
+    { 
+        return new Observable<ConnectionChange>(observer =>
+        {
+            this.socket.on(Action.CONNECTED, (data: ConnectionChange) => observer.next(data));
+        });
+    }
+
+    public onRenamed(): Observable<any>
+    { 
+        return new Observable<any>(obesrver =>
+        {
+            this.socket.on(Action.RENAME, (oldUser: User, newUser: User) => obesrver.next(oldUser));
         });
     }
 

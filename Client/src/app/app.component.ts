@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { SocketService } from './_services/socket-service';
 
-import { User, Message, ChatMessage, Action, Event, Configuration } from '../../../Server/src/model/index';
+import { User, Message, ChatMessage, Action, Event, Configuration, ConnectionChange } from '../../../Server/src/model/index';
 
 @Component({
   selector: 'app-root',
@@ -23,7 +23,7 @@ export class AppComponent
 
   private initIoConnection(): void
   {
-    this.socketService.initSocket();
+    this.socketService.initSocket(new User("Bailey"));
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: ChatMessage) =>
@@ -36,17 +36,16 @@ export class AppComponent
       {
         console.log('connected');
       });
-
-    this.socketService.onEvent(Event.DISCONNECT)
-      .subscribe(() =>
-      {
-        console.log('disconnected');
-      });
+    
+    this.socketService.onConnectionNotification().subscribe((status: ConnectionChange) =>
+    {
+      console.log(`User: ${status.User.name} has ${status.Action}`);
+    });
   }
 
   public SendMessage(): void
   { 
-    this.socketService.send(new ChatMessage(new User("Bailey"), "Testing!", this.GetDate()));
+    this.socketService.send("Testing!");
   }
 
   public BySentAt(): Message[]
@@ -64,11 +63,5 @@ export class AppComponent
         return 0;
       }  
     });
-  }
-
-  public GetDate(): Date
-  { 
-    var dt = new Date();
-    return dt;
   }
 }
