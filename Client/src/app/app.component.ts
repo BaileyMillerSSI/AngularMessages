@@ -18,12 +18,17 @@ export class AppComponent
 
   constructor(private socketService: SocketService)
   {
-    this.initIoConnection();
+    var prompt = window.prompt("Please enter your name");
+    if (prompt != null)
+    { 
+      // Has a name
+      this.initIoConnection(prompt);
+    }  
   }
 
-  private initIoConnection(): void
+  private initIoConnection(name: string): void
   {
-    this.socketService.initSocket(new User("Bailey"));
+    this.socketService.initSocket(new User(name));
 
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: ChatMessage) =>
@@ -41,11 +46,26 @@ export class AppComponent
     {
       console.log(`User: ${status.User.name} has ${status.Action}`);
     });
+
+    this.socketService.onRenamed().subscribe((data: any) =>
+    {
+      console.log(data);
+    });
   }
 
   public SendMessage(): void
   { 
     this.socketService.send("Testing!");
+  }
+
+  public Rename(): void
+  { 
+    var prompt = window.prompt("Please enter your name", this.socketService.GetUsername());
+    if (prompt != null)
+    {
+      this.socketService.changeName(new User(prompt));
+    } 
+    
   }
 
   public BySentAt(): Message[]

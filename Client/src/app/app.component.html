@@ -1,5 +1,7 @@
 <input type="button" (click)="SendMessage()" value="Send!"/>
+<input type="button" (click)="Rename()" value="Change Name"/>
+
 <ul>
-    <li *ngFor="let msg of BySentAt()">{{msg.content}} -- Received at {{msg.sentAt | date:'mediumTime' }}</li>
+    <li *ngFor="let msg of BySentAt()">{{msg.from.name}} said {{msg.content}} -- Received at {{msg.sentAt | date:'mediumTime' }}</li>
 </ul>
 <router-outlet></router-outlet>

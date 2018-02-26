@@ -7,6 +7,7 @@ import { Event, Action } from "./model/enums";
 import { Configuration } from "./model/config";
 import { User } from './model/user';
 import { ConnectionChange } from './model/connection-change';
+import { NameChange } from "./model/name-change";
 
 export class ChatServer
 {
@@ -78,7 +79,7 @@ export class ChatServer
 
             socket.on(Action.RENAME, (oldUser: User, newUser: User) =>
             {
-                this.io.emit(Action.RENAME, oldUser, newUser);
+                this.io.emit(Action.RENAME, new NameChange(oldUser, newUser));
             });
         });
 

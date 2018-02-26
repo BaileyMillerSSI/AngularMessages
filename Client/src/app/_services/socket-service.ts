@@ -2,7 +2,7 @@ import { Injectable, HostListener } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
 
-import { User, Message, ChatMessage, Action, Event, Configuration, ConnectionChange } from '../../../../Server/src/model/index';
+import { User, Message, ChatMessage, Action, Event, Configuration, ConnectionChange, NameChange } from '../../../../Server/src/model/index';
 
 import * as socketIo from 'socket.io-client';
 
@@ -13,12 +13,14 @@ export class SocketService
 {
     private socket;
     private _User: User;
+    public isInit: boolean = false;
 
     public initSocket(u: User): void
     {
         this.socket = socketIo(SERVER_URL);
         this.socket.emit(Action.JOINED, u);
         this._User = u;
+        this.isInit = true;
 
         // Register for page exit event!
         window.onbeforeunload = () =>
@@ -30,6 +32,17 @@ export class SocketService
     public send(s: string): void
     {
         this.socket.emit('message', new ChatMessage(this._User, s, new Date()));
+    }
+
+    public GetUsername(): string
+    { 
+        return this._User.name;
+    }
+
+    public changeName(u: User): void
+    { 
+        this.socket.emit(Action.RENAME, this._User, u);
+        this._User = u;
     }
 
     public onMessage(): Observable<ChatMessage>
@@ -48,11 +61,11 @@ export class SocketService
         });
     }
 
-    public onRenamed(): Observable<any>
+    public onRenamed(): Observable<NameChange>
     { 
-        return new Observable<any>(obesrver =>
+        return new Observable<NameChange>(observer =>
         {
-            this.socket.on(Action.RENAME, (oldUser: User, newUser: User) => obesrver.next(oldUser));
+            this.socket.on(Action.RENAME, (data: NameChange) => observer.next(data));
         });
     }
 
