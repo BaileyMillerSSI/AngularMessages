@@ -3,10 +3,12 @@ import * as express from 'express';
 import * as socketIo from 'socket.io';
 
 import { Message } from './model/message';
+import { Event, Action } from "./model/enums";
+import { Configuration } from "./model/config";
 
 export class ChatServer
 {
-    public static readonly PORT: number = 8585;
+    public static readonly PORT: number = Configuration.PORT;
     private app: express.Application;
     private server: Server;
     private io: SocketIO.Server;
@@ -43,12 +45,13 @@ export class ChatServer
 
     private listen(): void
     {
+
         this.server.listen(this.port, () =>
         {
             console.log('Running server on port %s', this.port);
         });
-
-        this.io.on('connect', (socket: any) =>
+    
+        this.io.on(Event.CONNECT, (socket: any) =>
         {
             console.log('Connected client on port %s.', this.port);
 
@@ -58,12 +61,12 @@ export class ChatServer
                 this.io.emit('message', m);
             });
 
-            socket.on('action'), (a: any) =>
+            socket.on('action', (a: Action) =>
             {
                 this.io.emit('action', a);
-            };
+            });
 
-            socket.on('disconnect', () =>
+            socket.on(Event.DISCONNECT, () =>
             {
                 console.log('Client disconnected');
             });

@@ -28,7 +28,7 @@ export class AppComponent
     this.ioConnection = this.socketService.onMessage()
       .subscribe((message: Message) =>
       {
-        alert(`Message: ${message}`);
+        console.log(`Message: ${message.content}`);
       });
 
     this.socketService.onEvent(Event.CONNECT)
