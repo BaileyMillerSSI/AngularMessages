@@ -4,7 +4,8 @@
   "description": "The websocket part of the chat application",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-instance": "gulp build && node ./dist/index.js"
   },
   "repository": {
     "type": "git",
