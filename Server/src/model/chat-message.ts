@@ -3,7 +3,7 @@ import { User } from "./user";
 
 export class ChatMessage extends Message
 {
-    constructor(from: User, content: string)
+    constructor(from: User, content: string, public sentAt: Date)
     {
         super(from, content);
     }

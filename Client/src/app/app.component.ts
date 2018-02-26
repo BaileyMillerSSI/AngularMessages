@@ -12,7 +12,7 @@ export class AppComponent
 {
 
   user: User;
-  messages: Message[] = [];
+  messages: ChatMessage[] = [];
   messageContent: string;
   ioConnection: any;
 
@@ -26,9 +26,9 @@ export class AppComponent
     this.socketService.initSocket();
 
     this.ioConnection = this.socketService.onMessage()
-      .subscribe((message: Message) =>
+      .subscribe((message: ChatMessage) =>
       {
-        console.log(`Message: ${message.content}`);
+        this.messages.push(message);
       });
 
     this.socketService.onEvent(Event.CONNECT)
@@ -46,6 +46,29 @@ export class AppComponent
 
   public SendMessage(): void
   { 
-    this.socketService.send(new ChatMessage(new User("Bailey"), "Testing!"));
+    this.socketService.send(new ChatMessage(new User("Bailey"), "Testing!", this.GetDate()));
+  }
+
+  public BySentAt(): Message[]
+  { 
+    return this.messages.sort((a: ChatMessage, b: ChatMessage) =>
+    {
+      if (a.sentAt < b.sentAt)
+      {
+        return 1;
+      } else if (a.sentAt > b.sentAt)
+      {
+        return -1;
+      } else
+      { 
+        return 0;
+      }  
+    });
+  }
+
+  public GetDate(): Date
+  { 
+    var dt = new Date();
+    return dt;
   }
 }

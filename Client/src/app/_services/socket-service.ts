@@ -23,11 +23,11 @@ export class SocketService
         this.socket.emit('message', message);
     }
 
-    public onMessage(): Observable<Message>
+    public onMessage(): Observable<ChatMessage>
     {
-        return new Observable<Message>(observer =>
+        return new Observable<ChatMessage>(observer =>
         {
-            this.socket.on('message', (data: Message) => observer.next(data));
+            this.socket.on('message', (data: ChatMessage) => observer.next(data));
         });
     }
 

@@ -1,3 +1,5 @@
-<input type="text" placeholder="Message Text"/>
-<input type="submit" (click)="SendMessage()" value="Send!"/>
+<input type="button" (click)="SendMessage()" value="Send!"/>
+<ul>
+    <li *ngFor="let msg of BySentAt()">{{msg.content}} -- Received at {{msg.sentAt | date:'mediumTime' }}</li>
+</ul>
 <router-outlet></router-outlet>
